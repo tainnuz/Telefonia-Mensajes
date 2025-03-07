@@ -9,8 +9,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -23,25 +21,25 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 class MainActivity : ComponentActivity() {
-    // Definir un lanzador de permisos para pedir permisos en tiempo de ejecución
     private val permissionRequest = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
-        // Verifica si los permisos fueron concedidos
         val permissionsGranted = permissions[Manifest.permission.READ_PHONE_STATE] == true &&
+                permissions[Manifest.permission.READ_CALL_LOG] == true &&
                 permissions[Manifest.permission.SEND_SMS] == true
+
         if (!permissionsGranted) {
-            // Mostrar un mensaje de error o advertencia si no se conceden los permisos
+            Log.e("MainActivity", "No se concedieron todos los permisos necesarios")
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Solicitar permisos al inicio
         permissionRequest.launch(
             arrayOf(
                 Manifest.permission.READ_PHONE_STATE,
+                Manifest.permission.READ_CALL_LOG,
                 Manifest.permission.SEND_SMS
             )
         )
@@ -64,16 +62,14 @@ fun AutoReplyScreen() {
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Título
         Text(
             text = "CONTESTAR",
             fontSize = 24.sp,
-            color = Color(0xFF388E3C) // Verde oscuro
+            color = Color(0xFF388E3C)
         )
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Campo de número
         OutlinedTextField(
             value = phoneNumber,
             onValueChange = { phoneNumber = it },
@@ -81,14 +77,13 @@ fun AutoReplyScreen() {
             modifier = Modifier.fillMaxWidth(0.8f),
             keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Phone),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = Color(0xFF4CAF50), // Verde
-                unfocusedBorderColor = Color(0xFF8BC34A) // Verde claro
+                focusedBorderColor = Color(0xFF4CAF50),
+                unfocusedBorderColor = Color(0xFF8BC34A)
             )
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Campo de mensaje
         OutlinedTextField(
             value = message,
             onValueChange = { message = it },
@@ -102,7 +97,6 @@ fun AutoReplyScreen() {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Botón alineado a la derecha
         Row(
             modifier = Modifier.fillMaxWidth(0.8f),
             horizontalArrangement = Arrangement.End
@@ -114,7 +108,7 @@ fun AutoReplyScreen() {
                     SharedPrefManager.saveNumber(context, phoneNumber.text)
                     SharedPrefManager.saveMessage(context, message.text)
                 },
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF388E3C)) // Verde oscuro
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF388E3C))
             ) {
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Enviar")

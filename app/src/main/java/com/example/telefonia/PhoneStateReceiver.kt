@@ -10,37 +10,35 @@ import android.util.Log
 class PhoneStateReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == TelephonyManager.ACTION_PHONE_STATE_CHANGED) {
-            // Obtiene el estado de la llamada
             val state = intent.getStringExtra(TelephonyManager.EXTRA_STATE)
-            // Obtiene el numero entrante si esta disponible
             val incomingNumber = intent.getStringExtra(TelephonyManager.EXTRA_INCOMING_NUMBER)
 
-            // Verifica si el telefono esta sonando y si hay un numero entrante
-            if (state == TelephonyManager.EXTRA_STATE_RINGING) {
-                if (incomingNumber != null) {
-                    val savedNumber = SharedPrefManager.getSavedNumber(context)
-                    val autoReplyMessage = SharedPrefManager.getSavedMessage(context)
+            Log.d("PhoneStateReceiver", "Estado de la llamada: $state")
 
-                    Log.d("PhoneStateReceiver", "Numero guardado para respuesta automatica: $savedNumber")
+            if (incomingNumber != null) {
+                Log.d("PhoneStateReceiver", "Numero entrante: $incomingNumber")
+            } else {
+                Log.d("PhoneStateReceiver", "Numero entrante es null")
+            }
 
-                    // Si el numero entrante es el mismo que el guardado, envia el mensaje automatico
-                    if (incomingNumber == savedNumber) {
-                        sendSMS(incomingNumber, autoReplyMessage)
-                        Log.d("PhoneStateReceiver", "Enviando SMS a $incomingNumber")
-                    } else {
-                        Log.d("PhoneStateReceiver", "El numero no coincide con el guardado")
-                    }
+            if (state == TelephonyManager.EXTRA_STATE_RINGING && incomingNumber != null) {
+                val savedNumber = SharedPrefManager.getSavedNumber(context)
+                val autoReplyMessage = SharedPrefManager.getSavedMessage(context)
+
+                Log.d("PhoneStateReceiver", "Numero guardado para respuesta automática: $savedNumber")
+
+                if (incomingNumber == savedNumber) {
+                    sendSMS(incomingNumber, autoReplyMessage)
+                    Log.d("PhoneStateReceiver", "Enviando SMS a $incomingNumber")
                 } else {
-                    Log.d("PhoneStateReceiver", "El nimero entrante es null")
+                    Log.d("PhoneStateReceiver", "El numero no coincide con el guardado")
                 }
             }
         }
     }
 
-    // Metodo para enviar un SMS al numero especificado con el mensaje dado
     private fun sendSMS(phoneNumber: String, message: String) {
         try {
-            // Obtiene el SmsManager para enviar el mensaje
             val smsManager = SmsManager.getDefault()
             smsManager.sendTextMessage(phoneNumber, null, message, null, null)
             Log.d("PhoneStateReceiver", "SMS enviado a $phoneNumber")
