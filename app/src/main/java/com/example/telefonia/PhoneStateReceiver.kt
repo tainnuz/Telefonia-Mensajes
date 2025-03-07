@@ -16,18 +16,22 @@ class PhoneStateReceiver : BroadcastReceiver() {
             val incomingNumber = intent.getStringExtra(TelephonyManager.EXTRA_INCOMING_NUMBER)
 
             // Verifica si el telefono esta sonando y si hay un numero entrante
-            if (state == TelephonyManager.EXTRA_STATE_RINGING && incomingNumber != null) {
-                val savedNumber = SharedPrefManager.getSavedNumber(context)
-                val autoReplyMessage = SharedPrefManager.getSavedMessage(context)
+            if (state == TelephonyManager.EXTRA_STATE_RINGING) {
+                if (incomingNumber != null) {
+                    val savedNumber = SharedPrefManager.getSavedNumber(context)
+                    val autoReplyMessage = SharedPrefManager.getSavedMessage(context)
 
-                Log.d("PhoneStateReceiver", "Número guardado para respuesta automática: $savedNumber")
+                    Log.d("PhoneStateReceiver", "Numero guardado para respuesta automatica: $savedNumber")
 
-                // Si el numero entrante es el mismo que el guardado, envia el mensaje automatico
-                if (incomingNumber == savedNumber) {
-                    sendSMS(incomingNumber, autoReplyMessage)
-                    Log.d("PhoneStateReceiver", "Enviando SMS a $incomingNumber")
+                    // Si el numero entrante es el mismo que el guardado, envia el mensaje automatico
+                    if (incomingNumber == savedNumber) {
+                        sendSMS(incomingNumber, autoReplyMessage)
+                        Log.d("PhoneStateReceiver", "Enviando SMS a $incomingNumber")
+                    } else {
+                        Log.d("PhoneStateReceiver", "El numero no coincide con el guardado")
+                    }
                 } else {
-                    Log.d("PhoneStateReceiver", "El número no coincide con el guardado")
+                    Log.d("PhoneStateReceiver", "El nimero entrante es null")
                 }
             }
         }
