@@ -1,8 +1,12 @@
 package com.example.telefonia
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -19,8 +23,29 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 class MainActivity : ComponentActivity() {
+    // Definir un lanzador de permisos para pedir permisos en tiempo de ejecución
+    private val permissionRequest = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        // Verifica si los permisos fueron concedidos
+        val permissionsGranted = permissions[Manifest.permission.READ_PHONE_STATE] == true &&
+                permissions[Manifest.permission.SEND_SMS] == true
+        if (!permissionsGranted) {
+            // Mostrar un mensaje de error o advertencia si no se conceden los permisos
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Solicitar permisos al inicio
+        permissionRequest.launch(
+            arrayOf(
+                Manifest.permission.READ_PHONE_STATE,
+                Manifest.permission.SEND_SMS
+            )
+        )
+
         setContent {
             AutoReplyScreen()
         }
@@ -84,14 +109,15 @@ fun AutoReplyScreen() {
         ) {
             Button(
                 onClick = {
+                    Log.d("AutoReplyScreen", "Número a guardar: ${phoneNumber.text}")
+                    Log.d("AutoReplyScreen", "Mensaje a guardar: ${message.text}")
                     SharedPrefManager.saveNumber(context, phoneNumber.text)
                     SharedPrefManager.saveMessage(context, message.text)
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF388E3C)) // Verde oscuro
             ) {
-                Icon(imageVector = Icons.Default.Check, contentDescription = "Guardar")
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Guardar")
+                Text("Enviar")
             }
         }
     }
